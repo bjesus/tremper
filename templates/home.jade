@@ -1,0 +1,109 @@
+doctype html
+html(dir="rtl")
+  head: title לוח טרמפים
+  meta(charset="utf-8")
+  link(rel="stylesheet", href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css")
+  link(rel="stylesheet", href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-rtl/3.2.0-rc2/css/bootstrap-rtl.min.css")
+  link(rel="stylesheet", href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css")
+  link(rel="stylesheet", href="/static/style.css")
+  body
+
+    mixin message(offer)
+      .well
+        span.hidden.sortby= offer.ridedate
+        .pull-left
+          .thumbnail
+            img(src="//graph.facebook.com/"+offer.userid+"/picture", title=offer.name)
+        if offer.from or offer.to
+          .travel-story
+            h3
+              if offer.from
+                = offer.from.decode('utf-8')
+              |  
+              span.glyphicon.glyphicon-chevron-left
+              |  
+              if offer.to
+                = offer.to.decode('utf-8')
+        if offer.ridedate
+          strong
+            span.glyphicon.glyphicon-time
+            |  
+            span(data-time=offer.ridedate) 
+        if not offer.ridedate or not offer.from or not offer.to
+          p
+            small= offer.message
+        .collapse(id="more-"+offer.id)
+          ul.list-inline
+            if offer.phone
+              li
+                span.label.label-info
+                  span.glyphicon.glyphicon-phone
+                  |  
+                  = offer.phone
+            li
+              span.label.label-info
+                | פורסם 
+                span(data-time=offer.date)
+          if not offer.ridedate or not offer.from or not offer.to
+            span
+          else
+            blockquote
+              p
+                small= offer.message
+
+        .text-center(style="clear: both;")
+          .btn-group.btn-group-sm
+            a.btn.btn-primary(target="_blank", href='http://facebook.com/'+offer.userid)= offer.name
+            a.btn.btn-primary(target="_blank", href='http://facebook.com/'+offer.id) פתח בפייס
+            button.btn.btn-primary(type='button',data-toggle="collapse", data-target="#more-"+offer.id) פרטים נוספים
+
+
+
+    nav.navbar.navbar-default.navbar-fixed-top(role="navigation")
+      .container
+        a.navbar-brand(href="#")
+          span.glyphicon.glyphicon-road
+          |   טרמפים 
+    
+    .container
+      .row
+        .col-sm-12.col-md-4
+          h3 מציעים
+          ul
+          for offer in offerings
+            +message(offer)
+        .col-sm-12.col-md-4
+          h3 מחפשים
+          ul
+          for offer in searchings
+            +message(offer)
+        .col-sm-12.col-md-4
+          h3 לא בטוח
+          ul
+          for offer in not_sure
+            +message(offer)
+
+    script(src="/static/jquery/dist/jquery.min.js")
+    script(src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js")
+    script(src="/static/tinysort/dist/jquery.tinysort.min.js")
+    script(src="/static/moment/min/moment-with-locales.min.js")
+    script.
+      jQuery(document).ready(function() {
+        moment.locale('he');
+        $("[data-time]").each(function(i) {
+          var elm;
+          elm = jQuery(this);
+          elm.html(moment(elm.attr("data-time")).fromNow());
+        });
+
+        window.setInterval(function(){
+          $("[data-time]").each(function(i) {
+            var elm;
+            elm = jQuery(this);
+            elm.html(moment(elm.attr("data-time")).fromNow());
+          });
+        }, 5000);
+
+        $('.well').tsort('span.sortby');
+
+      });
